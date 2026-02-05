@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KNSO Employee Attendance Dashboard - January 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f172a;
+            color: white;
+            padding: 10px;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 200px 1fr 320px;
+            grid-template-rows: 80px 1fr 30px;
+            gap: 10px;
+            height: 100vh;
+            max-height: 100vh;
+        }
+
+        /* HEADER */
+        .dashboard-header {
+            grid-column: 1 / -1;
+            background: #1e3a8a;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #2563eb;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .dashboard-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .dashboard-header p {
+            font-size: 14px;
+            color: #60a5fa;
+            margin: 4px 0 0 0;
+        }
+
+        /* LEFT COLUMN - METRICS */
+        .left-column {
+            display: grid;
+            grid-template-rows: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .metric-card {
+            background: #1e3a8a;
+            border-radius: 8px;
+            padding: 15px 10px;
+            text-align: center;
+            border: 2px solid #2563eb;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .metric-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 5px 0;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #60a5fa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .metric-target {
+            font-size: 10px;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+
+        /* MIDDLE COLUMN - CHARTS with different heights */
+        .middle-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chart-container {
+            background: #1e3a8a;
+            border-radius: 8px;
+            padding: 15px;
+            border: 2px solid #2563eb;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-container.bar-chart {
+            flex: 2; /* Larger - 2/3 of space */
+        }
+
+        .chart-container.pie-chart {
+            flex: 1; /* Smaller - 1/3 of space */
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #2563eb;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* RIGHT COLUMN - INSIGHTS */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .insights-panel {
+            background: #1e3a8a;
+            border-radius: 8px;
+            padding: 15px;
+            border: 2px solid #2563eb;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .insights-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .insights-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #2563eb;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .insight-card {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid #2563eb;
+        }
+
+        .insight-title {
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .insight-text {
+            font-size: 11px;
+            line-height: 1.5;
+            color: #9ca3af;
+        }
+
+        /* CHART CONTAINER */
+        .chart-plot-container {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* FOOTER */
+        .dashboard-footer {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 11px;
+            color: #6b7280;
+            padding-top: 8px;
+            border-top: 2px solid #2563eb;
+            font-weight: 500;
+        }
+
+        /* SCROLLBAR */
+        .insights-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .insights-content::-webkit-scrollbar-track {
+            background: #0f172a;
+            border-radius: 3px;
+        }
+
+        .insights-content::-webkit-scrollbar-thumb {
+            background: #2563eb;
+            border-radius: 3px;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1200px) {
+            .dashboard-container {
+                grid-template-columns: 180px 1fr 280px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+                height: auto;
+                overflow: auto;
+            }
+            
+            .left-column {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: auto;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- HEADER -->
+        <div class="dashboard-header">
+            <h1>📊 KNSO EMPLOYEE ATTENDANCE DASHBOARD - JANUARY 2026</h1>
+            <p>Statistics Department | Comprehensive Attendance Analysis & Management</p>
+        </div>
+
+        <!-- LEFT COLUMN - KEY METRICS -->
+        <div class="left-column">
+            <div class="metric-card">
+                <div class="metric-icon">📈</div>
+                <div class="metric-value" style="color: #ef4444;">42%</div>
+                <div class="metric-label">ATTENDANCE RATE</div>
+                <div class="metric-target">Target: 90% | Department Performance</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">⚠️</div>
+                <div class="metric-value" style="color: #ef4444;">171</div>
+                <div class="metric-label">UNDOCUMENTED ABSENCES</div>
+                <div class="metric-target">Office Manager Verification Required</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">📅</div>
+                <div class="metric-value" style="color: #2563eb;">352</div>
+                <div class="metric-label">EFFECTIVE WORK DAYS</div>
+                <div class="metric-target">Total Days: 496 | Excluded: 144</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">👥</div>
+                <div class="metric-value" style="color: #60a5fa;">16</div>
+                <div class="metric-label">TOTAL STAFF</div>
+                <div class="metric-target">Active Employees in Department</div>
+            </div>
+        </div>
+
+        <!-- MIDDLE COLUMN - CHARTS with different sizes -->
+        <div class="middle-column">
+            <!-- Chart 1: Employee Attendance Breakdown (LARGER) -->
+            <div class="chart-container bar-chart">
+                <div class="chart-title">👥 EMPLOYEE ATTENDANCE BREAKDOWN</div>
+                <div class="chart-plot-container" id="bar-chart"></div>
+            </div>
+
+            <!-- Chart 2: Attendance Distribution Pie (SMALLER) -->
+            <div class="chart-container pie-chart">
+                <div class="chart-title">📊 ATTENDANCE DISTRIBUTION</div>
+                <div class="chart-plot-container" id="pie-chart"></div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN - INSIGHTS -->
+        <div class="right-column">
+            <div class="insights-panel">
+                <div class="insights-title">💡 COMPREHENSIVE INSIGHTS & ACTIONS</div>
+                <div class="insights-content">
+                    
+        <div class="insight-card">
+            <div class="insight-title" style="color: #3b82f6;">📊 KNSO PERFORMANCE OVERVIEW</div>
+            <div class="insight-text">The KNSO division achieved an overall attendance rate of <b>42.0%</b> for January 2026. 
+                    This is based on 352 effective work days out of 496 total records (144 'No Record' entries excluded).
+                    
+                    <b>Performance Breakdown:</b>
+                    • Target Achievement: ⚠️ Below 90% target by 48.0%
+                    • Punctuality Rate: 11.4% full work days
+                    • Tardiness Impact: 28.4% of days involved late arrivals
+                    • Early Departures: 10.8% of days involved early leaving</div>
+        </div>
+        
+        <div class="insight-card">
+            <div class="insight-title" style="color: #3b82f6;">👥 KNSO EMPLOYEE PERFORMANCE DISTRIBUTION</div>
+            <div class="insight-text"><b>KNSO Employee Attendance Distribution:</b>
+                    • Top Performers (95%+): 0 employees
+                    • Good Performers (90-94%): 0 employees
+                    • Average Performers (80-89%): 2 employees
+                    • Low Performers (70-79%): 0 employees
+                    • Critical Performers (<70%): 14 employees
+                    
+                    <b>Statistical Analysis:</b>
+                    • Average Attendance: 42.0%
+                    • Median Attendance: 38.6%
+                    • Performance Range: 86.4% (Highest: 86.4%, Lowest: 0.0%)</div>
+        </div>
+        
+        <div class="insight-card">
+            <div class="insight-title" style="color: #3b82f6;">📅 ATTENDANCE PATTERN ANALYSIS</div>
+            <div class="insight-text"><b>Attendance Issue Breakdown:</b>
+                    • Late Arrivals: 70 days (19.9% of effective days)
+                    • Early Departures: 8 days (2.3% of effective days)
+                    • Late & Early: 30 days (8.5% of effective days)
+                    • Missing In Time: 11 days
+                    • Missing Out Time: 22 days
+                    
+                    <b>Pattern Summary:</b>
+                    • Total Attendance Issues: 141 (40.1% of days)
+                    • Full Work Days: 40 (11.4% of days)
+                    • Combined Issues: 108 days with timing issues</div>
+        </div>
+        
+        <div class="insight-card">
+            <div class="insight-title" style="color: #0d9488;">📋 ABSENTEEISM & LEAVE MANAGEMENT</div>
+            <div class="insight-text"><b>Absence Analysis:</b>
+                    • Documented Absences: 0 days (Properly documented leave)
+                    • Undocumented Absences: 171 days (Requires verification)
+                    • Total Absences: 171 days (48.6% of effective days)
+                    • 'No Record' Entries: 144 (Excluded from calculations)
+                    
+                    <b>Management Focus:</b>
+                    • 🚨 Critical issue
+                    • 171 undocumented absences require immediate verification</div>
+        </div>
+        
+        <div class="insight-card">
+            <div class="insight-title" style="color: #f59e0b;">📉 PERFORMANCE IMPROVEMENT PLAN</div>
+            <div class="insight-text"><b>Attention Required:</b>
+                        • Low Performers (70-79%): 0 employees
+                        • Critical Performers (<70%): 14 employees
+                        
+                        <b>Highest Priority Interventions:</b>
+                        No low performers
+                        Critical: Orebwa Morate1 (0.0%), Kanikua Tekaoki (9.1%), Tiriara Ikam (9.1%)
+                        
+                        <b>Recommended Actions:</b>
+                        1. Schedule one-on-one meetings within 7 days
+                        2. Document discussion points and improvement plans
+                        3. Set 30-day improvement targets
+                        4. Weekly check-ins for critical performers
+                        5. Escalate to HR if no improvement after 30 days</div>
+        </div>
+        
+        <div class="insight-card">
+            <div class="insight-title" style="color: #f59e0b;">⏰ PUNCTUALITY IMPROVEMENT INITIATIVE</div>
+            <div class="insight-text"><b>Current Status:</b>
+                        • Tardiness Rate: 28.4% (High - Needs Immediate Action)
+                        • Full Day Rate: 11.4% (Below Target)
+                        
+                        <b>Action Plan:</b>
+                        1. Implement arrival time monitoring for next 2 weeks
+                        2. Send department-wide reminder about core work hours (8:00 AM - 5:00 PM)
+                        3. Address repeat offenders individually
+                        4. Consider flexible start times within 30-minute window
+                        5. Track improvement monthly</div>
+        </div>
+        
+        <div class="insight-card">
+            <div class="insight-title" style="color: #ef4444;">✅ OFFICE MANAGER ACTION CHECKLIST</div>
+            <div class="insight-text"><b>Immediate Actions (This Week):</b>
+                    <br>• Verify documentation for all undocumented absences<br>• Schedule urgent meetings with critical performers<br>• Implement stricter arrival time monitoring
+                    
+                    <b>Ongoing Responsibilities:</b>
+                    <br>• Organize department meeting on attendance policy<br>• Update attendance records daily<br>• Maintain communication logs<br>• Prepare weekly attendance report<br>• Schedule monthly review meetings
+                    
+                    <b>Documentation Requirements:</b>
+                    • All absence documentation verified and filed
+                    • Meeting minutes documented
+                    • Improvement plans recorded
+                    • Monthly reports submitted to management</div>
+        </div>
+        
+        <div class="insight-card">
+            <div class="insight-title" style="color: #8b5cf6;">🎯 STRATEGIC RECOMMENDATIONS</div>
+            <div class="insight-text"><b>For Department Management:</b>
+                    <br>• Consider implementing attendance incentives or recognition program<br>• Review departmental workload and work environment factors<br>• Review and possibly revise departmental arrival time policy<br>• Strengthen absence documentation procedures and training<br>• Continue monthly attendance review meetings<br>• Link attendance to performance reviews and bonuses<br>• Provide regular feedback to all team members
+                    
+                    <b>Long-term Strategy:</b>
+                    • Implement quarterly attendance awards
+                    • Develop attendance improvement training
+                    • Create attendance dashboard for real-time monitoring
+                    • Link team performance to attendance metrics
+                    
+                    <b>Next Review:</b>
+                    • Schedule next comprehensive review for end of February
+                    • Set target: Improve attendance rate to 92% by March
+                    • Monitor intervention effectiveness monthly</div>
+        </div>
+        
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="dashboard-footer">
+            Generated on 2026-02-06 10:24 | 
+            Effective Days: 352 (Total: 496 - No Record: 144) | 
+            Attendance Rate: (Full Day + Late + Leave Early + Late&Leave Early) / Effective Days
+        </div>
+    </div>
+
+    <!-- Include Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    
+    <!-- JavaScript to render charts -->
+    <script>
+        // Wait for the page to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Chart data passed from Python
+            const chartData = {"bar": {"data": [{"hovertemplate": "<b>%{y}</b><br>%{x} days<br>Category: Present (Full Day)<extra></extra>", "marker": {"color": "#10b981"}, "name": "Present (Full Day)", "orientation": "h", "text": ["", "2", "1", "", "1", "", "", "", "3", "", "", "5", "2", "1", "14", "11"], "textfont": {"color": "white", "size": 9}, "textposition": "inside", "x": [0, 2, 1, 0, 1, 0, 0, 0, 3, 0, 0, 5, 2, 1, 14, 11], "y": ["Orebwa Morate1", "Kanikua Tekaoki", "Tiriara Ikam", "Ririere Tekabu", "Anataake Maurintekeraoi", "Kitanna Kiritian", "Mwakurete Karebwa", "Taobwe Tasie", "Rooiti Betero", "Ariera Kourata", "Orebwa Morate", "Aoniba Francis", "Taotirita Kauongo", "Niibo Iaruru", "Agnether Lemuelu", "Michael Maruia"], "type": "bar"}, {"hovertemplate": "<b>%{y}</b><br>%{x} days<br>Category: Present (Late)<extra></extra>", "marker": {"color": "#f59e0b"}, "name": "Present (Late)", "orientation": "h", "text": ["", "", "1", "3", "3", "7", "7", "2", "5", "4", "10", "3", "3", "12", "2", "8"], "textfont": {"color": "white", "size": 9}, "textposition": "inside", "x": [0, 0, 1, 3, 3, 7, 7, 2, 5, 4, 10, 3, 3, 12, 2, 8], "y": ["Orebwa Morate1", "Kanikua Tekaoki", "Tiriara Ikam", "Ririere Tekabu", "Anataake Maurintekeraoi", "Kitanna Kiritian", "Mwakurete Karebwa", "Taobwe Tasie", "Rooiti Betero", "Ariera Kourata", "Orebwa Morate", "Aoniba Francis", "Taotirita Kauongo", "Niibo Iaruru", "Agnether Lemuelu", "Michael Maruia"], "type": "bar"}, {"hovertemplate": "<b>%{y}</b><br>%{x} days<br>Category: Present (Left Early)<extra></extra>", "marker": {"color": "#3b82f6"}, "name": "Present (Left Early)", "orientation": "h", "text": ["", "", "", "", "1", "", "", "", "", "1", "", "3", "2", "", "1", ""], "textfont": {"color": "white", "size": 9}, "textposition": "inside", "x": [0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 3, 2, 0, 1, 0], "y": ["Orebwa Morate1", "Kanikua Tekaoki", "Tiriara Ikam", "Ririere Tekabu", "Anataake Maurintekeraoi", "Kitanna Kiritian", "Mwakurete Karebwa", "Taobwe Tasie", "Rooiti Betero", "Ariera Kourata", "Orebwa Morate", "Aoniba Francis", "Taotirita Kauongo", "Niibo Iaruru", "Agnether Lemuelu", "Michael Maruia"], "type": "bar"}, {"hovertemplate": "<b>%{y}</b><br>%{x} days<br>Category: Present (Late & Leave Early)<extra></extra>", "marker": {"color": "#ef4444"}, "name": "Present (Late & Leave Early)", "orientation": "h", "text": ["", "", "", "3", "2", "", "", "6", "1", "6", "2", "2", "6", "1", "1", ""], "textfont": {"color": "white", "size": 9}, "textposition": "inside", "x": [0, 0, 0, 3, 2, 0, 0, 6, 1, 6, 2, 2, 6, 1, 1, 0], "y": ["Orebwa Morate1", "Kanikua Tekaoki", "Tiriara Ikam", "Ririere Tekabu", "Anataake Maurintekeraoi", "Kitanna Kiritian", "Mwakurete Karebwa", "Taobwe Tasie", "Rooiti Betero", "Ariera Kourata", "Orebwa Morate", "Aoniba Francis", "Taotirita Kauongo", "Niibo Iaruru", "Agnether Lemuelu", "Michael Maruia"], "type": "bar"}, {"hovertemplate": "<b>%{y}</b><br>%{x} days<br>Category: Present (Missing In Time)<extra></extra>", "marker": {"color": "#0d9488"}, "name": "Present (Missing In Time)", "orientation": "h", "text": ["", "1", "", "4", "1", "", "1", "", "1", "", "1", "", "1", "", "1", ""], "textfont": {"color": "white", "size": 9}, "textposition": "inside", "x": [0, 1, 0, 4, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], "y": ["Orebwa Morate1", "Kanikua Tekaoki", "Tiriara Ikam", "Ririere Tekabu", "Anataake Maurintekeraoi", "Kitanna Kiritian", "Mwakurete Karebwa", "Taobwe Tasie", "Rooiti Betero", "Ariera Kourata", "Orebwa Morate", "Aoniba Francis", "Taotirita Kauongo", "Niibo Iaruru", "Agnether Lemuelu", "Michael Maruia"], "type": "bar"}, {"hovertemplate": "<b>%{y}</b><br>%{x} days<br>Category: Present (Missing Out Time)<extra></extra>", "marker": {"color": "#eab308"}, "name": "Present (Missing Out Time)", "orientation": "h", "text": ["", "1", "1", "6", "", "", "", "6", "4", "1", "1", "1", "", "", "1", ""], "textfont": {"color": "white", "size": 9}, "textposition": "inside", "x": [0, 1, 1, 6, 0, 0, 0, 6, 4, 1, 1, 1, 0, 0, 1, 0], "y": ["Orebwa Morate1", "Kanikua Tekaoki", "Tiriara Ikam", "Ririere Tekabu", "Anataake Maurintekeraoi", "Kitanna Kiritian", "Mwakurete Karebwa", "Taobwe Tasie", "Rooiti Betero", "Ariera Kourata", "Orebwa Morate", "Aoniba Francis", "Taotirita Kauongo", "Niibo Iaruru", "Agnether Lemuelu", "Michael Maruia"], "type": "bar"}, {"hovertemplate": "<b>%{y}</b><br>%{x} days<br>Category: Documented Absence<extra></extra>", "marker": {"color": "#8b5cf6"}, "name": "Documented Absence", "orientation": "h", "text": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""], "textfont": {"color": "white", "size": 9}, "textposition": "inside", "x": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "y": ["Orebwa Morate1", "Kanikua Tekaoki", "Tiriara Ikam", "Ririere Tekabu", "Anataake Maurintekeraoi", "Kitanna Kiritian", "Mwakurete Karebwa", "Taobwe Tasie", "Rooiti Betero", "Ariera Kourata", "Orebwa Morate", "Aoniba Francis", "Taotirita Kauongo", "Niibo Iaruru", "Agnether Lemuelu", "Michael Maruia"], "type": "bar"}, {"hovertemplate": "<b>%{y}</b><br>%{x} days<br>Category: Undocumented Absence<extra></extra>", "marker": {"color": "#dc2626"}, "name": "Undocumented Absence", "orientation": "h", "text": ["22", "18", "19", "6", "14", "15", "14", "8", "8", "10", "8", "8", "8", "8", "2", "3"], "textfont": {"color": "white", "size": 9}, "textposition": "inside", "x": [22, 18, 19, 6, 14, 15, 14, 8, 8, 10, 8, 8, 8, 8, 2, 3], "y": ["Orebwa Morate1", "Kanikua Tekaoki", "Tiriara Ikam", "Ririere Tekabu", "Anataake Maurintekeraoi", "Kitanna Kiritian", "Mwakurete Karebwa", "Taobwe Tasie", "Rooiti Betero", "Ariera Kourata", "Orebwa Morate", "Aoniba Francis", "Taotirita Kauongo", "Niibo Iaruru", "Agnether Lemuelu", "Michael Maruia"], "type": "bar"}, {"hovertemplate": "<b>%{y}</b><br>%{x} days<br>Category: Other<extra></extra>", "marker": {"color": "#6b7280"}, "name": "Other", "orientation": "h", "text": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""], "textfont": {"color": "white", "size": 9}, "textposition": "inside", "x": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "y": ["Orebwa Morate1", "Kanikua Tekaoki", "Tiriara Ikam", "Ririere Tekabu", "Anataake Maurintekeraoi", "Kitanna Kiritian", "Mwakurete Karebwa", "Taobwe Tasie", "Rooiti Betero", "Ariera Kourata", "Orebwa Morate", "Aoniba Francis", "Taotirita Kauongo", "Niibo Iaruru", "Agnether Lemuelu", "Michael Maruia"], "type": "bar"}], "layout": {"template": {"data": {"histogram2dcontour": [{"type": "histogram2dcontour", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "choropleth": [{"type": "choropleth", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "histogram2d": [{"type": "histogram2d", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "heatmap": [{"type": "heatmap", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "contourcarpet": [{"type": "contourcarpet", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "contour": [{"type": "contour", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "surface": [{"type": "surface", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "mesh3d": [{"type": "mesh3d", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "scatter": [{"fillpattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}, "type": "scatter"}], "parcoords": [{"type": "parcoords", "line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterpolargl": [{"type": "scatterpolargl", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "bar": [{"error_x": {"color": "#2a3f5f"}, "error_y": {"color": "#2a3f5f"}, "marker": {"line": {"color": "#E5ECF6", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "bar"}], "scattergeo": [{"type": "scattergeo", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterpolar": [{"type": "scatterpolar", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "histogram": [{"marker": {"pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "histogram"}], "scattergl": [{"type": "scattergl", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatter3d": [{"type": "scatter3d", "line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattermap": [{"type": "scattermap", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattermapbox": [{"type": "scattermapbox", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterternary": [{"type": "scatterternary", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattercarpet": [{"type": "scattercarpet", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "carpet": [{"aaxis": {"endlinecolor": "#2a3f5f", "gridcolor": "white", "linecolor": "white", "minorgridcolor": "white", "startlinecolor": "#2a3f5f"}, "baxis": {"endlinecolor": "#2a3f5f", "gridcolor": "white", "linecolor": "white", "minorgridcolor": "white", "startlinecolor": "#2a3f5f"}, "type": "carpet"}], "table": [{"cells": {"fill": {"color": "#EBF0F8"}, "line": {"color": "white"}}, "header": {"fill": {"color": "#C8D4E3"}, "line": {"color": "white"}}, "type": "table"}], "barpolar": [{"marker": {"line": {"color": "#E5ECF6", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "barpolar"}], "pie": [{"automargin": true, "type": "pie"}]}, "layout": {"autotypenumbers": "strict", "colorway": ["#636efa", "#EF553B", "#00cc96", "#ab63fa", "#FFA15A", "#19d3f3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"], "font": {"color": "#2a3f5f"}, "hovermode": "closest", "hoverlabel": {"align": "left"}, "paper_bgcolor": "white", "plot_bgcolor": "#E5ECF6", "polar": {"bgcolor": "#E5ECF6", "angularaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "radialaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}}, "ternary": {"bgcolor": "#E5ECF6", "aaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "baxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "caxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}}, "coloraxis": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "colorscale": {"sequential": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "sequentialminus": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "diverging": [[0, "#8e0152"], [0.1, "#c51b7d"], [0.2, "#de77ae"], [0.3, "#f1b6da"], [0.4, "#fde0ef"], [0.5, "#f7f7f7"], [0.6, "#e6f5d0"], [0.7, "#b8e186"], [0.8, "#7fbc41"], [0.9, "#4d9221"], [1, "#276419"]]}, "xaxis": {"gridcolor": "white", "linecolor": "white", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "white", "automargin": true, "zerolinewidth": 2}, "yaxis": {"gridcolor": "white", "linecolor": "white", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "white", "automargin": true, "zerolinewidth": 2}, "scene": {"xaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}, "yaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}, "zaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}}, "shapedefaults": {"line": {"color": "#2a3f5f"}}, "annotationdefaults": {"arrowcolor": "#2a3f5f", "arrowhead": 0, "arrowwidth": 1}, "geo": {"bgcolor": "white", "landcolor": "#E5ECF6", "subunitcolor": "white", "showland": true, "showlakes": true, "lakecolor": "white"}, "title": {"x": 0.05}, "mapbox": {"style": "light"}}}, "title": {"font": {"size": 18, "color": "white"}, "text": "\ud83d\udc65 EMPLOYEE ATTENDANCE BREAKDOWN", "x": 0.5}, "margin": {"t": 50, "b": 20, "l": 150, "r": 20}, "yaxis": {"tickfont": {"size": 10, "color": "white"}, "title": {"text": ""}, "automargin": true}, "xaxis": {"tickfont": {"size": 10, "color": "white"}, "title": {"text": "Days Count"}}, "legend": {"font": {"size": 9, "color": "white"}, "orientation": "h", "yanchor": "bottom", "y": -0.3, "xanchor": "center", "x": 0.5, "bgcolor": "rgba(0,0,0,0.8)", "bordercolor": "rgba(255,255,255,0.3)", "borderwidth": 1}, "barmode": "stack", "height": 400, "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)"}}, "pie": {"data": [{"hole": 0.5, "hovertemplate": "<b>%{label}</b><br>Count: %{value}<br>Percentage: %{text}<extra></extra>", "insidetextorientation": "radial", "labels": ["Present (Full Day)", "Present (Late)", "Present (Left Early)", "Present (Late & Leave Early)", "Undocumented Absence"], "marker": {"colors": ["#10b981", "#f59e0b", "#3b82f6", "#ef4444", "#dc2626"], "line": {"color": "white", "width": 1}}, "sort": false, "text": ["11.4%", "19.9%", "2.3%", "8.5%", "48.6%"], "textfont": {"color": "white", "size": 11}, "textinfo": "text", "textposition": "inside", "values": [40, 70, 8, 30, 171], "type": "pie"}], "layout": {"template": {"data": {"histogram2dcontour": [{"type": "histogram2dcontour", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "choropleth": [{"type": "choropleth", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "histogram2d": [{"type": "histogram2d", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "heatmap": [{"type": "heatmap", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "contourcarpet": [{"type": "contourcarpet", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "contour": [{"type": "contour", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "surface": [{"type": "surface", "colorbar": {"outlinewidth": 0, "ticks": ""}, "colorscale": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]]}], "mesh3d": [{"type": "mesh3d", "colorbar": {"outlinewidth": 0, "ticks": ""}}], "scatter": [{"fillpattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}, "type": "scatter"}], "parcoords": [{"type": "parcoords", "line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterpolargl": [{"type": "scatterpolargl", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "bar": [{"error_x": {"color": "#2a3f5f"}, "error_y": {"color": "#2a3f5f"}, "marker": {"line": {"color": "#E5ECF6", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "bar"}], "scattergeo": [{"type": "scattergeo", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterpolar": [{"type": "scatterpolar", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "histogram": [{"marker": {"pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "histogram"}], "scattergl": [{"type": "scattergl", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatter3d": [{"type": "scatter3d", "line": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattermap": [{"type": "scattermap", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattermapbox": [{"type": "scattermapbox", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scatterternary": [{"type": "scatterternary", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "scattercarpet": [{"type": "scattercarpet", "marker": {"colorbar": {"outlinewidth": 0, "ticks": ""}}}], "carpet": [{"aaxis": {"endlinecolor": "#2a3f5f", "gridcolor": "white", "linecolor": "white", "minorgridcolor": "white", "startlinecolor": "#2a3f5f"}, "baxis": {"endlinecolor": "#2a3f5f", "gridcolor": "white", "linecolor": "white", "minorgridcolor": "white", "startlinecolor": "#2a3f5f"}, "type": "carpet"}], "table": [{"cells": {"fill": {"color": "#EBF0F8"}, "line": {"color": "white"}}, "header": {"fill": {"color": "#C8D4E3"}, "line": {"color": "white"}}, "type": "table"}], "barpolar": [{"marker": {"line": {"color": "#E5ECF6", "width": 0.5}, "pattern": {"fillmode": "overlay", "size": 10, "solidity": 0.2}}, "type": "barpolar"}], "pie": [{"automargin": true, "type": "pie"}]}, "layout": {"autotypenumbers": "strict", "colorway": ["#636efa", "#EF553B", "#00cc96", "#ab63fa", "#FFA15A", "#19d3f3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52"], "font": {"color": "#2a3f5f"}, "hovermode": "closest", "hoverlabel": {"align": "left"}, "paper_bgcolor": "white", "plot_bgcolor": "#E5ECF6", "polar": {"bgcolor": "#E5ECF6", "angularaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "radialaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}}, "ternary": {"bgcolor": "#E5ECF6", "aaxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "baxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}, "caxis": {"gridcolor": "white", "linecolor": "white", "ticks": ""}}, "coloraxis": {"colorbar": {"outlinewidth": 0, "ticks": ""}}, "colorscale": {"sequential": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "sequentialminus": [[0.0, "#0d0887"], [0.1111111111111111, "#46039f"], [0.2222222222222222, "#7201a8"], [0.3333333333333333, "#9c179e"], [0.4444444444444444, "#bd3786"], [0.5555555555555556, "#d8576b"], [0.6666666666666666, "#ed7953"], [0.7777777777777778, "#fb9f3a"], [0.8888888888888888, "#fdca26"], [1.0, "#f0f921"]], "diverging": [[0, "#8e0152"], [0.1, "#c51b7d"], [0.2, "#de77ae"], [0.3, "#f1b6da"], [0.4, "#fde0ef"], [0.5, "#f7f7f7"], [0.6, "#e6f5d0"], [0.7, "#b8e186"], [0.8, "#7fbc41"], [0.9, "#4d9221"], [1, "#276419"]]}, "xaxis": {"gridcolor": "white", "linecolor": "white", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "white", "automargin": true, "zerolinewidth": 2}, "yaxis": {"gridcolor": "white", "linecolor": "white", "ticks": "", "title": {"standoff": 15}, "zerolinecolor": "white", "automargin": true, "zerolinewidth": 2}, "scene": {"xaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}, "yaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}, "zaxis": {"backgroundcolor": "#E5ECF6", "gridcolor": "white", "linecolor": "white", "showbackground": true, "ticks": "", "zerolinecolor": "white", "gridwidth": 2}}, "shapedefaults": {"line": {"color": "#2a3f5f"}}, "annotationdefaults": {"arrowcolor": "#2a3f5f", "arrowhead": 0, "arrowwidth": 1}, "geo": {"bgcolor": "white", "landcolor": "#E5ECF6", "subunitcolor": "white", "showland": true, "showlakes": true, "lakecolor": "white"}, "title": {"x": 0.05}, "mapbox": {"style": "light"}}}, "title": {"font": {"size": 18, "color": "white"}, "text": "\ud83d\udcca ATTENDANCE DISTRIBUTION", "x": 0.5}, "margin": {"t": 50, "b": 20, "l": 20, "r": 20}, "legend": {"font": {"size": 9, "color": "white"}, "orientation": "v", "yanchor": "top", "y": 0.99, "xanchor": "right", "x": 1.2, "bgcolor": "rgba(0,0,0,0.8)", "bordercolor": "rgba(255,255,255,0.3)", "borderwidth": 1}, "font": {"color": "white"}, "height": 280, "showlegend": true, "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)"}}};
+            
+            // Initialize charts
+            if (chartData.bar) {
+                Plotly.newPlot('bar-chart', chartData.bar.data, chartData.bar.layout, {
+                    displayModeBar: false,
+                    responsive: true
+                });
+            }
+            
+            if (chartData.pie) {
+                Plotly.newPlot('pie-chart', chartData.pie.data, chartData.pie.layout, {
+                    displayModeBar: false,
+                    responsive: true
+                });
+            }
+            
+            // Make charts responsive
+            window.addEventListener('resize', function() {
+                if (chartData.bar) Plotly.Plots.resize('bar-chart');
+                if (chartData.pie) Plotly.Plots.resize('pie-chart');
+            });
+        });
+    </script>
+</body>
+</html>
